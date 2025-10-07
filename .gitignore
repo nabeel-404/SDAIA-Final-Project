@@ -1,3 +1,8 @@
+# ignore dataset files
+qa_system/data/*.json 
+
+# ignore PLAID index files
+qa_system/retrieval/index 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

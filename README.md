@@ -9,8 +9,16 @@
    - `pip install -r requirements.txt`
 3. CLI demo:
    - `python main.py "Who is the president of the United States?"`
-4. Streamlit UI:
-   - `streamlit run ui/streamlit_app.py`
+
+
+## Notes
+### Pylate requires Voyager, which is available on python 3.12 and below:
+
+- macos:
+   - brew install python@3.12
+   - `python3.12 -m venv venv && source venv/bin/activate`
+   - `python --version`
+   - `pip install -r requirements.txt`
 
 
 
