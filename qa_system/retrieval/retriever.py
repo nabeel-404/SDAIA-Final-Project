@@ -1,20 +1,100 @@
-from typing import Dict, List
+from typing import List, Dict
+from pylate import models, indexes, retrieve
+from qa_system.utils import Settings
+import os
+import json
 
 
 class Retriever:
     def __init__(self) -> None:
+        cfg = Settings()
 
-        # initialize the index 
-        # initialize the retriever
-        # initialize the document_ids_to_sentence (from the json file)
-        pass
+        # Initialize PLAID index (use existing index)
+        self.index = indexes.PLAID(
+            index_folder=cfg.index_folder,
+            index_name=cfg.index_name,
+            override=False
+        )
 
-    def retrieve(self, query: str, top_k: int = 20) -> List[Dict]:
+        # Initialize the retriever
+        self.retriever = retrieve.ColBERT(index=self.index)
 
-        # 1. encoder the query (generate embedding)
-        # 2. retrieve top k documents
-        # 3. convert the document ids to sentences (from the json file)
-        # 4. return the documents (in text)
+        # Initialize ColBERT model
+        self.model = self._init_model()
 
-        return [{'text': 'text'}]
+        # Load document_id -> text mapping from JSON
+        self.document_ids_to_sentence = self._load_document_ids_to_sentence()
 
+        # Path to save the retrieval results
+        self.results_json_path = os.path.join(os.path.dirname(__file__), "retrieval_topk_results.json")
+
+    def _init_model(self):
+        """Initialize ColBERT model using Settings().model_name."""
+        cfg = Settings()
+        if not hasattr(cfg, "model_name") or not cfg.model_name:
+            raise RuntimeError(
+                "Settings().model_name is not set. Provide a valid ColBERT model path or name."
+            )
+        model = models.ColBERT(model_name_or_path=cfg.model_name)
+        if model is None:
+            raise RuntimeError(
+                f"Failed to load ColBERT model from '{cfg.model_name}'."
+            )
+        return model
+
+    def _load_document_ids_to_sentence(self) -> Dict[str, str]:
+        """Load document ID -> text mapping from JSON file."""
+        json_path = os.path.join(os.path.dirname(__file__), "document_ids_to_sentence.json")
+        if not os.path.exists(json_path):
+            raise FileNotFoundError(f"Mapping file not found at {json_path}")
+        with open(json_path, "r") as f:
+            data = json.load(f)
+        return data
+
+    def retrieve(self, query: str, top_k: int = 5) -> List[str]:
+        """Retrieve the top_k most relevant documents for a given query and save results to JSON."""
+        if self.model is None:
+            raise RuntimeError("Model not initialized properly.")
+
+        # Encode the query
+        query_emb = self.model.encode(
+            [query],
+            batch_size=1,
+            is_query=True,
+            show_progress_bar=False
+        )
+
+        # Retrieve top-k results
+        results = self.retriever.retrieve(queries_embeddings=query_emb, k=top_k)
+
+        # If single query, unwrap the list
+        if isinstance(results, list) and len(results) > 0 and isinstance(results[0], list):
+            results = results[0]
+
+        # Map results to text using the JSON mapping
+        contexts = []
+        for result in results:
+            doc_id = result["id"]
+            text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
+            contexts.append(text)
+
+        # Save results in the desired format
+        output_data = [
+            {
+                "query": query,
+                "contexts": contexts
+            }
+        ]
+
+        # Overwrite the JSON file
+        with open(self.results_json_path, "w") as f:
+            json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+        return contexts
+
+#if you want to test the retriever, uncomment the following code
+# if __name__ == "__main__":
+#     retriever = Retriever()
+#     results = retriever.retrieve("who is the smartest person in the world?") ##FYI the answer should be Abdullah :)
+#     for i, r in enumerate(results[:5], 1):
+#         print(f"{i}. {r}")
