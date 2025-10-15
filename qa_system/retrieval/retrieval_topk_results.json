@@ -1,0 +1,22 @@
+[
+  {
+    "query": "Were Scott Derrickson and Ed Wood of the same nationality?",
+    "contexts": [
+      "Sinister 2: Sinister 2 is a 2015 American supernatural horror film directed by Ciaran Foy and written by Scott Derrickson and C. Robert Cargill.",
+      "Ed Wood (film): Ed Wood is a 1994 American biographical period comedy-drama film directed and produced by Tim Burton, and starring Johnny Depp as cult filmmaker Ed Wood.",
+      "The Exorcism of Emily Rose: The Exorcism of Emily Rose is a 2005 American legal drama horror film directed by Scott Derrickson and starring Laura Linney and Tom Wilkinson.",
+      "Tommy Swerdlow: Tommy Swerdlow is an American actor and screenwriter.",
+      "Doctor Strange (2016 film):  The film was directed by Scott Derrickson, who wrote it with Jon Spaihts and C. Robert Cargill, and stars Benedict Cumberbatch as Stephen Strange, along with Chiwetel Ejiofor, Rachel McAdams, Benedict Wong, Michael Stuhlbarg, Benjamin Bratt, Scott Adkins, Mads Mikkelsen, and Tilda Swinton."
+    ]
+  },
+  {
+    "query": "What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+    "contexts": [
+      "Kiss and Tell (1945 film): Kiss and Tell is a 1945 American comedy film starring then 17-year-old Shirley Temple as Corliss Archer.",
+      "Mary Karooro Okurut:  Prior to that, from 1 March 2015 until 6 June 2016, she served as Cabinet Minister for National Security.",
+      "Jennifer Branstetter:  In that position, she was part of the Governor's \"senior staff.\"",
+      "Sara Botsford:  In 2002 she portrayed Kathleen Sinclair in the TV movie \"Trudeau\" about the life of the late Prime Minister Pierre Elliott Trudeau.",
+      "A Kiss for Corliss:  It stars Shirley Temple in her final starring role as well as her final film appearance."
+    ]
+  }
+]
