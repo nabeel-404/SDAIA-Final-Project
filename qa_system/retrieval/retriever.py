@@ -92,9 +92,8 @@ class Retriever:
 
         return contexts
 
-#if you want to test the retriever, uncomment the following code
-# if __name__ == "__main__":
-#     retriever = Retriever()
-#     results = retriever.retrieve("who is the smartest person in the world?") ##FYI the answer should be Abdullah :)
-#     for i, r in enumerate(results[:5], 1):
-#         print(f"{i}. {r}")
+if __name__ == "__main__":
+    retriever = Retriever()
+    results = retriever.retrieve("who is the smartest person in the world?") ##FYI the answer should not be Abdullah :)
+    for i, r in enumerate(results[:5], 1):
+        print(f"{i}. {r}")
