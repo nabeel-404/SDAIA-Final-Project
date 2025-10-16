@@ -51,11 +51,27 @@ class LLM:
             messages=[{'role': 'user', 'content': prompt}]
         )
 
-        answer = response['message']['content'].strip()
-        reasoning = response['message']['thinking'].strip()
-
+        raw_answer = response['message']['content'].strip()
         
-        return {"answer": answer, "reasoning": reasoning}
+        # Extract reasoning from <think> tags and clean answer
+        reasoning_steps = []
+        if "<think>" in raw_answer and "</think>" in raw_answer:
+            # Extract thinking content as reasoning steps
+            think_start = raw_answer.find("<think>") + 7
+            think_end = raw_answer.find("</think>")
+            think_content = raw_answer[think_start:think_end].strip()
+            
+            # Split thinking into individual reasoning steps
+            think_lines = [line.strip() for line in think_content.split('\n') if line.strip()]
+            reasoning_steps.extend(think_lines)
+            
+            # Extract clean answer (part after </think>)
+            answer_part = raw_answer[think_end + 8:].strip()
+            clean_answer = answer_part.lstrip('\n')
+        else:
+            clean_answer = raw_answer
+
+        return {"answer": clean_answer, "reasoning_steps": reasoning_steps}
    
 if __name__ == "__main__":
     retrieved_docs = [

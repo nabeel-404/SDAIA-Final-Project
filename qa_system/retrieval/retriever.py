@@ -48,8 +48,8 @@ class Retriever:
             data = json.load(f)
         return data
 
-    def retrieve(self, query: str, top_k: int = 5) -> List[str]:
-        """Retrieve the top_k most relevant documents for a given query and save results to JSON."""
+    def retrieve(self, query: str, top_k: int = 5) -> List[Dict]:
+        """Retrieve the top_k most relevant documents for a given query."""
         if self.model is None:
             raise RuntimeError("Model not initialized properly.")
 
@@ -68,25 +68,21 @@ class Retriever:
         if isinstance(results, list) and len(results) > 0 and isinstance(results[0], list):
             results = results[0]
 
-        # Map results to text using the JSON mapping
+        # Map results to dictionaries with text field for reranker
         contexts = []
         for result in results:
             doc_id = result["id"]
             text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
-            contexts.append(text)
+            contexts.append({
+                "text": text,
+                "id": doc_id,
+                "retriever_score": result.get("score", 0.0)
+            })
 
-        # Save results in the desired format
-        output_data = [
-            {
-                "query": query,
-                "contexts": contexts
-            }
-        ]
-
-        return output_data
+        return contexts
 
 if __name__ == "__main__":
     retriever = Retriever()
-    results = retriever.retrieve("Who is the dumbest person in the world?") ##FYI the answer should not be Abdullah :) 
-    for i, r in enumerate(results[0]['contexts'][:5], 1):
-        print(f"{i}. {r}")
+    results = retriever.retrieve("Who is the dumbest person in the world?")  # FYI the answer should not be Abdullah :)
+    for i, r in enumerate(results, 1):
+        print(f"{i}. {r['text']}")
