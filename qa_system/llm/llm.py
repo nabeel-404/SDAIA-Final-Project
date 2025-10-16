@@ -51,31 +51,30 @@ class LLM:
             messages=[{'role': 'user', 'content': prompt}]
         )
 
-        response_text = response['message']['content'].strip()
+        answer = response['message']['content'].strip()
+        reasoning = response['message']['thinking'].strip()
+
         
-        reasoning = response_text
-        
-        lines = response_text.splitlines()
-        answer = next(
-            (line.strip().replace("**Answer:**", "").strip() for line in lines if line.strip().startswith("**Answer:**")),
-            "No answer.")
-        return {"answer": answer, "reasoning_steps": [reasoning]}
+        return {"answer": answer, "reasoning": reasoning}
    
-# if __name__ == "__main__":
-#     retrieved_docs = [
-#         "Saudi National Day commemorates the unification of the Kingdom of Saudi Arabia by King Abdulaziz in 1932.",
-#         "It is celebrated annually on September 23 across Saudi Arabia.",
-#         "The day features national festivities, fireworks, and cultural events to honor the country's heritage.",
-#         "Government offices, schools, and many businesses close for the public holiday."
-#     ]
-#     user_query = "When is the Saudi National Day?"
+if __name__ == "__main__":
+    retrieved_docs = [
+        "Saudi National Day commemorates the unification of the Kingdom of Saudi Arabia by King Abdulaziz in 1932.",
+        "It is celebrated annually on September 23 across Saudi Arabia.",
+        "The day features national festivities, fireworks, and cultural events to honor the country's heritage.",
+        "Government offices, schools, and many businesses close for the public holiday."
+    ]
+    user_query = "When is the Saudi National Day?"
 
-#     llm = LLM()
-#     result = llm.answer(user_query, retrieved_docs)
+    llm = LLM()
+    result = llm.answer(user_query, retrieved_docs)
 
-#     print("\n--- Reasoning Steps ---")
-#     for step in result["reasoning_steps"]:
-#         print(step)
-#     # print("\n--- Final Answer ---")
-#     # print(result["answer"])
+    print("Answer:")
+    print(result["answer"], "\n")
+    print("Reasoning:")
+    print(result["reasoning"])
+
+
+
+
 
