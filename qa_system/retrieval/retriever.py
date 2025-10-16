@@ -25,9 +25,6 @@ class Retriever:
         # Load document_id -> text mapping from JSON
         self.document_ids_to_sentence = self._load_document_ids_to_sentence()
 
-        # Path to save the retrieval results
-        self.results_json_path = os.path.join(os.path.dirname(__file__), "retrieval_topk_results.json")
-
     def _init_model(self):
         """Initialize ColBERT model using Settings().model_name."""
         cfg = Settings()
@@ -86,14 +83,10 @@ class Retriever:
             }
         ]
 
-        # Overwrite the JSON file
-        with open(self.results_json_path, "w") as f:
-            json.dump(output_data, f, indent=2, ensure_ascii=False)
-
-        return contexts
+        return output_data
 
 if __name__ == "__main__":
     retriever = Retriever()
-    results = retriever.retrieve("who is the smartest person in the world?") ##FYI the answer should not be Abdullah :)
-    for i, r in enumerate(results[:5], 1):
+    results = retriever.retrieve("Who is the dumbest person in the world?") ##FYI the answer should not be Abdullah :) 
+    for i, r in enumerate(results[0]['contexts'][:5], 1):
         print(f"{i}. {r}")
