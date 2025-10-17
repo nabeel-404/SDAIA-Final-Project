@@ -1,6 +1,7 @@
 
 from typing import Dict, List
 import ollama
+import re
 
 class LLM:
     def __init__(self) -> None:
@@ -41,10 +42,25 @@ class LLM:
         )
 
         
-        answer = response['message']['content'].strip()
+        # Get the full response content
+        full_content = response['message']['content'].strip()
+        
+        
+        # Extract LLM reasoning from the <think> tags or the thinking field if it exists
 
+        think_pattern = r'<think>(.*?)</think>'
+        think_matches = re.findall(think_pattern, full_content, re.DOTALL)
+        reasoning = ""
+        if 'thinking' in response['message'] and response['message']['thinking']:
+            reasoning = response['message']['thinking'].strip()
+        elif think_matches:
+            reasoning = '\n'.join(think_matches).strip()
+        
+        # Remove <think> tags from the answer
+        answer = re.sub(think_pattern, '', full_content, flags=re.DOTALL).strip()
+        
+        
 
-        reasoning = response['message']['thinking'].strip()
 
         return {"answer": answer, "reasoning_steps": reasoning}
    
