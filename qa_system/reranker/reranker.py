@@ -66,7 +66,7 @@ class Reranker:
         # Attach scores
         for i, s in zip(idxs, scores):
             docs[i]["reranker_score"] = s
-            docs[i]["score"] = s  # optional: alias for downstream LLM
+            
 
         # Sort docs by score descending
         docs_sorted = sorted(
