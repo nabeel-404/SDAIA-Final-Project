@@ -68,28 +68,25 @@ class Retriever:
         # Retrieve top-k results for each query
         all_results = self.retriever.retrieve(queries_embeddings=query_emb, k=top_k)
 
-        # Merge and deduplicate results from all queries
-        seen_docs = set()
+        
         merged_contexts = []
         
         for query_results in all_results:
             for result in query_results:
                 doc_id = result["id"]
-                if doc_id not in seen_docs:
-                    seen_docs.add(doc_id)
-                    text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
-                    merged_contexts.append({
-                        "text": text,
-                        "id": doc_id,
-                        "retriever_score": result.get("score", 0.0)
-                    })
+                text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
+                merged_contexts.append({
+                    "text": text,
+                    "id": doc_id,
+                    "retriever_score": result.get("score", 0.0)
+                })
 
         # Sort by score and return top_k
-        merged_contexts.sort(key=lambda x: x["retriever_score"], reverse=True)
+        # merged_contexts.sort(key=lambda x: x["retriever_score"], reverse=True) # sorting is done internally by the retriever (check the source code in ColBERT.py)
         return merged_contexts[:top_k]
 
 if __name__ == "__main__":
     retriever = Retriever()
-    results = retriever.retrieve("Who is the dumbest person in the world?")  # FYI the answer should not be Abdullah :)
+    results = retriever.retrieve("Were Scott Derrickson and Ed Wood of the same nationality?")  # FYI the answer should not be Abdullah :)
     for i, r in enumerate(results, 1):
         print(f"{i}. {r['text']}")
