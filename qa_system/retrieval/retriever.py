@@ -50,36 +50,43 @@ class Retriever:
 
     def retrieve(self, query: str, top_k: int = 5) -> List[Dict]:
         """Retrieve the top_k most relevant documents for a given query."""
+        return self.retrieve_multiple([query], top_k)
+    
+    def retrieve_multiple(self, queries: List[str], top_k: int = 5) -> List[Dict]:
+        """Retrieve documents for multiple queries and merge results."""
         if self.model is None:
             raise RuntimeError("Model not initialized properly.")
 
-        # Encode the query
+        # Encode all queries
         query_emb = self.model.encode(
-            [query],
+            queries,
             batch_size=1,
             is_query=True,
             show_progress_bar=False
         )
 
-        # Retrieve top-k results
-        results = self.retriever.retrieve(queries_embeddings=query_emb, k=top_k)
+        # Retrieve top-k results for each query
+        all_results = self.retriever.retrieve(queries_embeddings=query_emb, k=top_k)
 
-        # If single query, unwrap the list
-        if isinstance(results, list) and len(results) > 0 and isinstance(results[0], list):
-            results = results[0]
+        # Merge and deduplicate results from all queries
+        seen_docs = set()
+        merged_contexts = []
+        
+        for query_results in all_results:
+            for result in query_results:
+                doc_id = result["id"]
+                if doc_id not in seen_docs:
+                    seen_docs.add(doc_id)
+                    text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
+                    merged_contexts.append({
+                        "text": text,
+                        "id": doc_id,
+                        "retriever_score": result.get("score", 0.0)
+                    })
 
-        # Map results to dictionaries with text field for reranker
-        contexts = []
-        for result in results:
-            doc_id = result["id"]
-            text = self.document_ids_to_sentence.get(doc_id, "<text not found>")
-            contexts.append({
-                "text": text,
-                "id": doc_id,
-                "retriever_score": result.get("score", 0.0)
-            })
-
-        return contexts
+        # Sort by score and return top_k
+        merged_contexts.sort(key=lambda x: x["retriever_score"], reverse=True)
+        return merged_contexts[:top_k]
 
 if __name__ == "__main__":
     retriever = Retriever()
