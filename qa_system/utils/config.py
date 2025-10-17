@@ -2,6 +2,8 @@ from pydantic import BaseModel
 import os
 
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 class Settings(BaseModel):
     retrieval_top_k: int = 20
     rerank_top_k: int = 5
