@@ -1,5 +1,6 @@
 # The orchestrator of the pipeline is done here
 from typing import Dict, List
+
 from qa_system.retrieval import Retriever
 from qa_system.reranker import Reranker
 from qa_system.llm import LLM
@@ -19,25 +20,27 @@ class QAPipeline:
     def answer_question(self, question: str) -> Dict:
         reasoning_steps: List[str] = []
 
+        rewritten_queries = [question]
+
         # Step 1: Query Rewriting (if available)
         if self.query_rewriter:
             reasoning_steps.append("Rewriting query for better retrieval...")
-            rewritten_queries = self.query_rewriter.rewrite_query(question)
+            rewritten_queries.extend(self.query_rewriter.rewrite_query(question))
             reasoning_steps.append(f"Generated {len(rewritten_queries)} query variations")
+            
             print(f"[Pipeline] Using {len(rewritten_queries)} query variations for retrieval")
-        else:
-            rewritten_queries = [question]
+        
 
         # Step 2: Retrieval with multiple queries
         reasoning_steps.append("Retrieving relevant documents...")
         if len(rewritten_queries) > 1:
-            candidates = self.retriever.retrieve_multiple(rewritten_queries, top_k=100)
+            candidates = self.retriever.retrieve_multiple(rewritten_queries, top_k=50)
         else:
-            candidates = self.retriever.retrieve(question, top_k=100)
+            candidates = self.retriever.retrieve(question, top_k=50)
 
         # Step 3: Reranking
         reasoning_steps.append("Reranking retrieved documents...")
-        top_docs = self.reranker.rerank(question, candidates, top_k=20)
+        top_docs = self.reranker.rerank(question, candidates, top_k=10)
 
         # Step 4: LLM Answer Generation
         reasoning_steps.append("Generating answer with LLM...")
@@ -45,8 +48,8 @@ class QAPipeline:
         llm_out = self.llm.answer(question, contexts)
         
         # Add LLM reasoning steps to pipeline reasoning steps
-        llm_reasoning = llm_out.get("reasoning_steps", [])
-        reasoning_steps.extend(llm_reasoning)
+        llm_reasoning = llm_out.get("reasoning_steps", []) 
+        reasoning_steps.append(llm_reasoning)
 
         return {
             "answer": llm_out.get("answer", ""),
