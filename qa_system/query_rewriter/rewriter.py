@@ -23,18 +23,24 @@ class QueryRewriter:
         Returns:
             List of entity-focused query variations
         """
-        prompt = f"""You are a query decomposition agent that decompose queries to multiple sub-queries to improve retrieval for multi-hop question-answering.
+        prompt = f"""You are a query decomposition agent that decompose queries to multiple sub-queries.
+
+        Example:
+        Question: "Are the Laleli Mosque and Esma Sultan Mansion located in the same neighborhood?"
+        Sub-queries:
+        - What is the neighborhood of the Laleli Mosque?
+        - What is the neighborhood of the Esma Sultan Mansion?
 
 Question: {query}
 
 Create 2-3 focused queries that target specific entities or concepts mentioned. 
 
-IMPORTANT: Return ONLY the focused queries, one per line"""
+IMPORTANT: Return ONLY the focused question queries, one per line"""
 
         try:
             response = ollama.chat(
                 model=self.model_name,
-                messages=[{'role': 'user', 'content': prompt}]
+                messages=[{'role': 'user', 'content': prompt}],
             )
             
             raw_queries = response['message']['content'].strip()
