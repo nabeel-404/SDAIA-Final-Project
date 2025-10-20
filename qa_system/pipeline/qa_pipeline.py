@@ -28,7 +28,6 @@ class QAPipeline:
             rewritten_queries.extend(self.query_rewriter.rewrite_query(question))
             reasoning_steps.append(f"Generated {len(rewritten_queries)} query variations")
             
-            print(f"[Pipeline] Using {len(rewritten_queries)} query variations for retrieval")
         
 
         # Step 2: Retrieval with multiple queries
