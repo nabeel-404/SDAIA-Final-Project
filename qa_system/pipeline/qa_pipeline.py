@@ -56,6 +56,13 @@ class QAPipeline:
             "contexts": top_docs,
             "rewritten_queries": rewritten_queries if self.query_rewriter else [question],
         }
+    
+def build_pipeline(use_rewriter: bool = True) -> "QAPipeline":
+    retriever = Retriever()
+    reranker = Reranker()
+    llm = LLM()
+    qr = QueryRewriter() if use_rewriter else None
+    return QAPipeline(retriever=retriever, reranker=reranker, llm=llm, query_rewriter=qr)
 
 
 
