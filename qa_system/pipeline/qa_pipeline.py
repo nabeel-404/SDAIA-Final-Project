@@ -5,9 +5,7 @@ from qa_system.retrieval import Retriever
 from qa_system.reranker import Reranker
 from qa_system.llm import LLM
 from qa_system.query_rewriter.rewriter import QueryRewriter
-
-
-
+from qa_system.utils import Settings
 
 
 class QAPipeline:
@@ -16,6 +14,7 @@ class QAPipeline:
         self.reranker = reranker
         self.llm = llm
         self.query_rewriter = query_rewriter
+        self.cfg = Settings()
 
     def answer_question(self, question: str) -> Dict:
         reasoning_steps: List[str] = []
@@ -32,14 +31,13 @@ class QAPipeline:
 
         # Step 2: Retrieval with multiple queries
         reasoning_steps.append("Retrieving relevant documents...")
-        if len(rewritten_queries) > 1:
-            candidates = self.retriever.retrieve_multiple(rewritten_queries, top_k=50)
-        else:
-            candidates = self.retriever.retrieve(question, top_k=50)
+        
+        candidates = self.retriever.retrieve_multiple(rewritten_queries, top_k=self.cfg.retrieval_top_k)
+        
 
         # Step 3: Reranking
         reasoning_steps.append("Reranking retrieved documents...")
-        top_docs = self.reranker.rerank(question, candidates, top_k=10)
+        top_docs = self.reranker.rerank(question, candidates, top_k=self.cfg.rerank_top_k)
 
         # Step 4: LLM Answer Generation
         reasoning_steps.append("Generating answer with LLM...")
@@ -69,7 +67,10 @@ def build_pipeline(use_rewriter: bool = True) -> "QAPipeline":
 if __name__ == "__main__":
     import json
     import random
-    
+    import torch
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        
     # Load the dataset and pick a random question
     with open('qa_system/data/hotpot_dev_distractor_v1.json', 'r') as f:
         data = json.load(f)
@@ -83,6 +84,7 @@ if __name__ == "__main__":
     print(f"Ground Truth Answer: {ground_truth}")
     print("\n" + "="*80)
     
+    
     retriever = Retriever()
     reranker = Reranker()
     llm = LLM()
@@ -90,7 +92,9 @@ if __name__ == "__main__":
     pipeline = QAPipeline(retriever=retriever, reranker=reranker, llm=llm, query_rewriter=query_rewriter)
     
     result = pipeline.answer_question(test_question)
-    
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+   
     print("Our System Answer:", result["answer"])
     print("\nQuery Variations Used:")
     for i, query in enumerate(result["rewritten_queries"], 1):

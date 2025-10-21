@@ -7,12 +7,12 @@ import json
 
 class Retriever:
     def __init__(self) -> None:
-        cfg = Settings()
+        self.cfg = Settings()
 
         # Initialize PLAID index (use existing index)
         self.index = indexes.PLAID(
-            index_folder=cfg.index_folder,
-            index_name=cfg.index_name,
+            index_folder=self.cfg.index_folder,
+            index_name=self.cfg.index_name,
             override=False
         )
 
@@ -27,15 +27,14 @@ class Retriever:
 
     def _init_model(self):
         """Initialize ColBERT model using Settings().model_name."""
-        cfg = Settings()
-        if not hasattr(cfg, "model_name") or not cfg.model_name:
+        if not hasattr(self.cfg, "model_name") or not self.cfg.model_name:
             raise RuntimeError(
                 "Settings().model_name is not set. Provide a valid ColBERT model path or name."
             )
-        model = models.ColBERT(model_name_or_path=cfg.model_name)
+        model = models.ColBERT(model_name_or_path=self.cfg.model_name)
         if model is None:
             raise RuntimeError(
-                f"Failed to load ColBERT model from '{cfg.model_name}'."
+                f"Failed to load ColBERT model from '{self.cfg.model_name}'."
             )
         return model
 
@@ -48,12 +47,16 @@ class Retriever:
             data = json.load(f)
         return data
 
-    def retrieve(self, query: str, top_k: int = 5) -> List[Dict]:
+    def retrieve(self, query: str, top_k: int = None) -> List[Dict]:
         """Retrieve the top_k most relevant documents for a given query."""
+        if top_k is None:
+            top_k = self.cfg.retrieval_top_k
         return self.retrieve_multiple([query], top_k)
     
-    def retrieve_multiple(self, queries: List[str], top_k: int = 5) -> List[Dict]:
+    def retrieve_multiple(self, queries: List[str], top_k: int = None) -> List[Dict]:
         """Retrieve documents for multiple queries and merge results."""
+        if top_k is None:
+            top_k = self.cfg.retrieval_top_k
         if self.model is None:
             raise RuntimeError("Model not initialized properly.")
 
