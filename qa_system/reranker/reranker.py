@@ -26,13 +26,11 @@ class Reranker:
         self.batch_size = batch_size or cfg.reranker_batch_size
         model_name = model_name or cfg.reranker_model_name
 
-        print(f"[Reranker] Loading {model_name} on {self.device}...")
         self.reranker = CrossEncoder(model_name, device=self.device, max_length=max_len)
 
         # Optional mixed precision for faster inference
         if (fp16 if fp16 is not None else cfg.reranker_fp16) and self.device.startswith("cuda"):
             self.reranker.model.half()
-            print("[Reranker] Using half precision (fp16)")
 
     def _score_pairs(self, pairs: List[Tuple[str, str]]) -> List[float]:
         """Compute relevance scores for (query, passage) pairs."""

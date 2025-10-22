@@ -9,7 +9,7 @@ from qa_system.utils import Settings
 
 
 class QAPipeline:
-    def __init__(self, retriever: Retriever, reranker: Reranker, llm: LLM, query_rewriter: QueryRewriter = None) -> None:
+    def __init__(self, retriever: Retriever = None, reranker: Reranker = None, llm: LLM = None, query_rewriter: QueryRewriter = None) -> None:
         self.retriever = retriever
         self.reranker = reranker
         self.llm = llm
@@ -18,33 +18,46 @@ class QAPipeline:
 
     def answer_question(self, question: str) -> Dict:
         reasoning_steps: List[str] = []
-
         rewritten_queries = [question]
+        top_docs = []
+        
+        # No Retriever configuration (Direct LLM only)
+        if not self.retriever:
+            reasoning_steps.append("Using direct LLM without retrieval...")
+            llm_out = self.llm.answer(question, contexts=[])
+            llm_reasoning = llm_out.get("reasoning_steps", [])
+            reasoning_steps.extend(llm_reasoning)
+            
+            return {
+                "answer": llm_out.get("answer", ""),
+                "reasoning_steps": reasoning_steps,
+                "contexts": [],
+                "rewritten_queries": [question],
+            }
 
         # Step 1: Query Rewriting (if available)
         if self.query_rewriter:
             reasoning_steps.append("Rewriting query for better retrieval...")
             rewritten_queries.extend(self.query_rewriter.rewrite_query(question))
-            reasoning_steps.append(f"Generated {len(rewritten_queries)} query variations")
-            
-        
-
+            reasoning_steps.append(f"Generated {len(rewritten_queries)} query variations")     
         # Step 2: Retrieval with multiple queries
         reasoning_steps.append("Retrieving relevant documents...")
-        
         candidates = self.retriever.retrieve_multiple(rewritten_queries, top_k=self.cfg.retrieval_top_k)
-        
 
-        # Step 3: Reranking
-        reasoning_steps.append("Reranking retrieved documents...")
-        top_docs = self.reranker.rerank(question, candidates, top_k=self.cfg.rerank_top_k)
+        # Step 3: Reranking (if available)
+        if not self.reranker:
+            reasoning_steps.append("Using retrieved documents without reranking...")
+            top_docs = candidates[:self.cfg.rerank_top_k]  # Take top k from retrieval
+        else:
+            reasoning_steps.append("Reranking retrieved documents...")
+            top_docs = self.reranker.rerank(question, candidates, top_k=self.cfg.rerank_top_k)
 
         # Step 4: LLM Answer Generation
         reasoning_steps.append("Generating answer with LLM...")
         contexts = [d.get("text", "") for d in top_docs]
         llm_out = self.llm.answer(question, contexts)
         
-        # Add LLM reasoning steps to pipeline reasoning steps
+        
         llm_reasoning = llm_out.get("reasoning_steps", []) 
         reasoning_steps.append(llm_reasoning)
 

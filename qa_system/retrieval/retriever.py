@@ -13,7 +13,9 @@ class Retriever:
         self.index = indexes.PLAID(
             index_folder=self.cfg.index_folder,
             index_name=self.cfg.index_name,
-            override=False
+            override=False,
+            device="cpu"
+
         )
 
         # Initialize the retriever
@@ -63,7 +65,6 @@ class Retriever:
         # Encode all queries
         query_emb = self.model.encode(
             queries,
-            batch_size=1,
             is_query=True,
             show_progress_bar=False
         )
