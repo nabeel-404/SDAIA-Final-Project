@@ -13,7 +13,7 @@
         "joint_prec": 0.0,
         "joint_recall": 0.0
     },
-    "Retriever only": {
+    "Retriever + Query Rewriter": {
         "em": 0.123,
         "f1": 0.19698510808606504,
         "prec": 0.19887612222888254,
