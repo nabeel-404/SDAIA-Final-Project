@@ -8,11 +8,11 @@ An advanced QA system that performs multi-hop reasoning across multiple document
 
 ![Abstract](abstract.png)
 
-## Evaluation
-![Evaluation](eval.png)
-
 ## Design
 ![Design](design.png)
+
+## Evaluation
+![Evaluation](eval.png)
 
 ## Project Structure
 
