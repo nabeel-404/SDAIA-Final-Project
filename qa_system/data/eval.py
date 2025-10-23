@@ -241,6 +241,9 @@ def build_no_reranker_pipeline():
 def build_no_query_rewriter_pipeline():
     return QAPipeline(retriever=retriever, reranker=reranker, llm=llm, query_rewriter=None)
 
+def build_retriever_only_pipeline():
+    return QAPipeline(retriever=retriever, reranker=None, llm=llm, query_rewriter=None)
+
 def build_full_pipeline():
     return QAPipeline(retriever=retriever, reranker=reranker, llm=llm, query_rewriter=query_rewriter)
 
@@ -248,11 +251,12 @@ def build_full_pipeline():
 # %%
 import gc
 configuration = {"Direct LLM only": build_no_retriever_pipeline,
-                "Retriever only": build_no_reranker_pipeline,
+                "Retriever only": build_retriever_only_pipeline,
+                "Retriever + Query Rewriter": build_no_reranker_pipeline,
                 "Retriever + Reranker": build_no_query_rewriter_pipeline,
                 "Retriever + Reranker + Query Rewriter": build_full_pipeline}
 
-MAX_ITER = 1000
+MAX_ITER = 500
 results = {}
 for config_name, build_pipeline in configuration.items():
     print(f"Evaluating {config_name}...")
@@ -271,7 +275,7 @@ for config_name, build_pipeline in configuration.items():
             truth[q] = entry['answer']
             pred = pipeline.answer_question(q)
             pred_answer = pred['answer']
-            pred_sp = [document_ids_to_sp[d['id']] for d in pred['contexts'][:2]]
+            pred_sp = [document_ids_to_sp[d['id']] for d in pred['contexts'][:10]]
 
         answer[entry['_id']] = pred_answer
         sp[entry['_id']] = pred_sp
@@ -291,7 +295,9 @@ for config_name, build_pipeline in configuration.items():
 
 
 import datetime
-with open(f'results-{MAX_ITER}-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.json', 'w') as f:
+with open(f'results-{MAX_ITER}-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-qwen3-0.6b-manypredsp.json', 'w') as f:
     json.dump(results, f, indent=4)
+
+print(results)
 
 

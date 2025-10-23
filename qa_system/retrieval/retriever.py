@@ -86,7 +86,7 @@ class Retriever:
                 })
 
         # Sort by score and return top_k
-        # merged_contexts.sort(key=lambda x: x["retriever_score"], reverse=True) # sorting is done internally by the retriever (check the source code in ColBERT.py)
+        merged_contexts.sort(key=lambda x: x["retriever_score"], reverse=True) 
         return merged_contexts[:top_k]
 
 if __name__ == "__main__":

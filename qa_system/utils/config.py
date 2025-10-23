@@ -6,7 +6,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class Settings(BaseModel):
     retrieval_top_k: int = 20
-    rerank_top_k: int = 5
+    rerank_top_k: int = 10
     model_name: str = "lightonai/Reason-ModernColBERT"
     reranker_model_name: str = "BAAI/bge-reranker-v2-m3"
     reranker_batch_size: int = 16
