@@ -14,6 +14,36 @@ An advanced QA system that performs multi-hop reasoning across multiple document
 ## Design
 ![Design](design.png)
 
+## Project Structure
+
+```
+SDAIA-Final-Project/
+├── requirements.txt                 # Dependencies
+├── README.md                       # Project documentation
+├── qa_system/                      # Core QA system package
+│   ├── __init__.py
+│   ├── data/                       # Data handling & evaluation
+│   │   ├── eval.py                 # Evaluation script
+│   │   ├── hotpotqa.py             # HotpotQA dataset loader
+│   │   └── *.json                  # Dataset files
+│   ├── llm/                        # Language model integration
+│   │   └── llm.py                  # LLM wrapper
+│   ├── pipeline/                   # Main QA pipeline
+│   │   └── qa_pipeline.py          # End-to-end QA process
+│   ├── query_rewriter/             # Query decomposition
+│   │   └── rewriter.py             # Query rewriting logic
+│   ├── reranker/                   # Evidence reranking
+│   │   └── reranker.py             # Cross-encoder reranker
+│   ├── retrieval/                  # Document retrieval
+│   │   ├── retriever.py            # ColBERT retriever
+│   │   └── index/                  # Pre-built search index
+│   ├── ui/                         # Web interface
+│   │   └── app.py                  # Streamlit/Gradio app
+│   └── utils/                      # Utilities
+│       └── config.py               # Configuration
+└── results-*.json                  # Evaluation results
+```
+
 ## Quickstart
 
 1. Create/activate venv:
