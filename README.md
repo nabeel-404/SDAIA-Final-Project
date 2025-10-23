@@ -1,5 +1,14 @@
 # SDAIA Oxford - Final Project
 
+## Abstract
+
+![Abstract](abstract.png)
+
+## Evaluation
+![Evaluation](eval.png)
+
+## Design
+![Design](design.png)
 
 ## Quickstart
 
@@ -8,7 +17,7 @@
 2. Install deps:
    - `pip install -r requirements.txt`
 3. CLI demo:
-   - `python main.py "Who is the president of the United States?"`
+   - `python -m qa_system.pipeline.qa_pipeline"`
 
 
 ## Notes
