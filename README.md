@@ -1,4 +1,8 @@
-# SDAIA Oxford - Final Project
+# SDAIA & University of Oxford - Final Project
+
+FIRE-QA (Full Interaction Retrieval and Enhanced Question Answering):
+
+An advanced QA system that performs multi-hop reasoning across multiple documents and explains its reasoning path, targeting the HotpotQA dataset. The core is a novel multi-stage retrieval pipeline that uses query decomposition followed by late-interaction encoders for high-recall retrieval and cross-encoder rerankers for precise evidence selection. 
 
 ## Abstract
 
